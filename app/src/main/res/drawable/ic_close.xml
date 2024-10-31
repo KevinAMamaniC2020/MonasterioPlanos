@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Imagen para el estado seleccionado -->
+    <item android:drawable="@drawable/layerdrawable" android:state_selected="true"/>
+
+    <!-- Imagen para el estado no seleccionado -->
+    <item android:drawable="@drawable/layerdrawable" />
+
+</selector>

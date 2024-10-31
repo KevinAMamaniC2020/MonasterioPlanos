@@ -4,13 +4,23 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
 
 public class plano extends View {
 
     private Paint paintWall, paintBorde,paintSeleccion, paintWindow, paintText;
+    private Rect calleGranadaRect, claustroNoviciasRect, patioSilencioRect,claustroNaranjosRect; // Ejemplo de áreas seleccionables
+
+
+    public interface OnAreaClickListener {
+        void onAreaClicked(String areaName);
+    }
+    private OnAreaClickListener listener;
+
 
     public plano(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -34,7 +44,7 @@ public class plano extends View {
         // Configuración de area definida para seleccionar
         paintSeleccion= new Paint();
         paintSeleccion.setColor(Color.TRANSPARENT);
-        paintSeleccion.setStyle(Paint.Style.STROKE);
+        paintSeleccion.setStyle(Paint.Style.FILL);
         paintSeleccion.setStrokeWidth(4f);
 
         // Configuración del pincel del circulo celeste
@@ -48,6 +58,13 @@ public class plano extends View {
         paintText.setTextSize(15f);
         paintText.setAntiAlias(true);
 
+
+        // Definición de áreas seleccionables
+        calleGranadaRect = new Rect(130, 600, 170, 800);
+        claustroNoviciasRect = new Rect(410, 40, 540, 110);
+        patioSilencioRect = new Rect(260, 40, 390, 110);
+        claustroNaranjosRect = new Rect(260, 140, 340, 220);
+
     }
 
 
@@ -60,28 +77,29 @@ public class plano extends View {
         int width = getWidth();
         int height = getHeight();
         float scaleFactor = Math.min(width / 600f, height / 1000f);
+
         canvas.scale(scaleFactor, scaleFactor);
 
         //Borde del plano
         canvas.drawRect(50, 20, 550, 1100, paintBorde);
 
         //Areas definidas para seleccionar
-        canvas.drawRect(410, 40, 540, 110, paintSeleccion);//Area Clautro Novicias
-        canvas.drawRect(260, 40, 390, 110, paintSeleccion);//Area Patio del silencio
-        canvas.drawRect(260, 140, 340, 220, paintSeleccion);//Area Claustro de los naranjos
+        canvas.drawRect(claustroNoviciasRect, paintSeleccion);//Area Clautro Novicias
+        canvas.drawRect(patioSilencioRect, paintSeleccion);//Area Patio del silencio
+        canvas.drawRect(claustroNaranjosRect, paintSeleccion);//Area Claustro de los naranjos
         canvas.drawRect(130, 140, 190, 350, paintSeleccion);//Area Claustro Mayor
         canvas.drawRect(200, 110, 250, 350, paintWall); //Area Pinacoteca
         canvas.drawRect(50, 110, 120, 350, paintWall);  //Area CoroBajo
         canvas.drawRect(50, 350, 120, 800, paintWall); //Area Iglesia de santa catalina
         canvas.drawRect(340, 230, 550, 550, paintWall); //Area Nuevo Monasterio
         canvas.drawCircle(138, 565, 15, paintWindow); //Area de la pileta
-        canvas.drawRect(130, 600, 170, 800, paintSeleccion); //Area de calle Granada
+        canvas.drawRect(calleGranadaRect, paintSeleccion); //Area de calle Granada
         canvas.drawRect(190, 600, 300, 800, paintSeleccion); //Area calle Toledo
         canvas.drawRect(140, 810, 300, 860, paintSeleccion);//Area Calle Sevilla
         canvas.drawRect(250, 350, 300, 500, paintSeleccion);//Area Calle Cordova
 
 
-        //El resto de sin funcionalidad
+        //Resto de planos dibujados
         canvas.drawRect(50, 20, 550, 55, paintWall);
         canvas.drawRect(325, 110, 550, 210, paintWall);
         canvas.drawRect(50, 110, 300, 140, paintWall);
@@ -131,7 +149,35 @@ public class plano extends View {
         canvas.drawText("Calle Granada", 600, 70, paintText);
         //Cale toledo
         canvas.drawText("Calle toledo", 650, -50, paintText);
+    }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
+            // Ajustar escala
+            int width = getWidth();
+            int height = getHeight();
+            float scaleFactor = Math.min(width / 600f, height / 1000f);
+
+            float x = event.getX() / scaleFactor;
+            float y = event.getY() / scaleFactor;
+
+            // Verifica en qué área se hizo clic y llama a la interfaz
+            if (calleGranadaRect.contains((int) x, (int) y)) {
+                if (listener != null) listener.onAreaClicked("Calle Granada");
+            } else if (claustroNoviciasRect.contains((int) x, (int) y)) {
+                if (listener != null) listener.onAreaClicked("Claustro Novicias");
+            } else if (patioSilencioRect.contains((int) x, (int) y)) {
+                if (listener != null) listener.onAreaClicked("Patio del Silencio");
+            } else if (claustroNaranjosRect.contains((int) x, (int) y)) {
+                if (listener != null) listener.onAreaClicked("Claustro de los Naranjos");
+            }
+        }
+        return true;
+    }
+
+    public void setOnAreaClickListener(OnAreaClickListener listener) {
+        this.listener = listener;
     }
 }
